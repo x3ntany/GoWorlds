@@ -1,0 +1,12 @@
+name: GoWorlds
+version: ${project.version}
+main: go.xentany.goworlds.GoWorldsPlugin
+api-version: '1.16'
+author: x3ntany
+commands:
+  goworlds:
+    aliases: [gw, worlds]
+    permission: goworlds.command.goworlds
+permissions:
+  goworlds.command.goworlds:
+    default: op
