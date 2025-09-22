@@ -20,15 +20,18 @@ jobs:
           java-version: '17'
           cache: maven
 
+      - name: Extract Maven project version
+        id: project_version
+        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+
       - name: Build with Maven
         run: mvn -B -ntp verify
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: build-${{ github.run_number }}
-          name: Automatic Release - Build ${‌{ github.run_number }}
+          tag_name: ${{ steps.project_version.outputs.version }}
+          name: Automatic Release - ${{ steps.project_version.outputs.version }}
           prerelease: false
           body: |
             This release was automatically created by GitHub Actions.
