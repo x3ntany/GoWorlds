@@ -1,17 +1,19 @@
-name: Java CI
+name: Java CI & Release
 
 on:
   push:
-    branches:
-    - main
+    tags:
+      - '[0-9]*'
 
 jobs:
-  build:
+  build-and-release:
+    name: Build and Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -23,14 +25,19 @@ jobs:
       - name: Build with Maven
         run: mvn -B -ntp verify
 
+      - name: Get project version from pom.xml
+        id: version
+        uses: odedhb/maven-project-version-action@v1.1.0
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: "build-${{ github.run_number }}"
-          name: "Automatic Release - Build ${{ github.run_number }}"
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ steps.version.outputs.version }}"
           prerelease: false
           body: |
             This release was automatically created by GitHub Actions.
+            Version: ${{ steps.version.outputs.version }}
           files: |
             target/GoWorlds-paper-*-jdk17.jar
