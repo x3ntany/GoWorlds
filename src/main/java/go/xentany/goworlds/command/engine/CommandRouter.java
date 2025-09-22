@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+
+import go.xentany.goworlds.locale.MessageKey;
+import go.xentany.goworlds.locale.Messages;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -93,10 +96,13 @@ public final class CommandRouter implements CommandExecutor, TabCompleter {
   }
 
   private void sendUsage(final @NotNull CommandSender sender) {
-    sender.sendMessage("Usage:");
+    Messages.send(sender, MessageKey.ROUTER_USAGE_HEADER);
 
-    for (final var subcommand : catalog) {
-      sender.sendMessage(" /" + name + " " + subcommand.usage());
+    for (final var sub : catalog) {
+      Messages.send(sender, MessageKey.ROUTER_USAGE_LINE, Messages.vars(
+          "command", name,
+          "usage", sub.usage())
+      );
     }
   }
 

@@ -2,6 +2,7 @@ package go.xentany.goworlds;
 
 import go.xentany.goworlds.command.GoWorldsCommand;
 import go.xentany.goworlds.config.YamlConfigService;
+import go.xentany.goworlds.locale.Messages;
 import go.xentany.goworlds.world.adapter.bukkit.generation.applier.BuiltinWorldGenerationApplier;
 import go.xentany.goworlds.world.adapter.bukkit.generation.applier.CompositeWorldGenerationApplier;
 import go.xentany.goworlds.world.adapter.bukkit.generation.applier.PluginWorldGenerationApplier;
@@ -15,7 +16,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -45,7 +45,9 @@ public final class GoWorldsPlugin extends JavaPlugin {
       );
 
       final var file = getDataFolder().toPath().resolve("worlds.yml");
-      final var yaml = new YamlConfigService(LoggerFactory.getLogger(logger.getName() + "-YAML"));
+      final var yaml = new YamlConfigService(logger);
+
+      Messages.initialize(this, yaml);
 
       repository = new YamlWorldsRepository(file, yaml);
       repository.load();
