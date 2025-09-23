@@ -20,8 +20,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
+
+  private static final Pattern WORLD_NAME_PATTERN = Pattern.compile("^[a-z0-9/._-]+$");
 
   private final WorldsService service;
   private final CommandRouter router;
@@ -63,6 +66,15 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
             return;
           }
 
+          if (!WORLD_NAME_PATTERN.matcher(name).matches()) {
+            Messages.send(sender, MessageKey.COMMON_WORLD_NAME_INVALID, Messages.vars(
+                "name", name,
+                "pattern", "[a-z0-9/._-]+"
+            ));
+
+            return;
+          }
+
           final var environment = WorldEnvironment.fromName(context.argument(1));
           final var generator = Optional.ofNullable(context.argument(2))
               .filter(input -> !input.isBlank())
@@ -85,6 +97,15 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
 
           if (name == null) {
             Messages.send(sender, MessageKey.COMMON_WORLD_REQUIRED);
+
+            return;
+          }
+
+          if (!WORLD_NAME_PATTERN.matcher(name).matches()) {
+            Messages.send(sender, MessageKey.COMMON_WORLD_NAME_INVALID, Messages.vars(
+                "name", name,
+                "pattern", "[a-z0-9/._-]+"
+            ));
 
             return;
           }
