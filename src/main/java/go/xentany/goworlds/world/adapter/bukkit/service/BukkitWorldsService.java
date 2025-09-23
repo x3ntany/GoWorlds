@@ -105,7 +105,7 @@ public final class BukkitWorldsService implements WorldsService {
         player.leaveVehicle();
       }
 
-      player.teleportAsync(target, PlayerTeleportEvent.TeleportCause.PLUGIN);
+      player.teleport(target, PlayerTeleportEvent.TeleportCause.PLUGIN);
     }
 
     final var ok = Bukkit.unloadWorld(world, save);
