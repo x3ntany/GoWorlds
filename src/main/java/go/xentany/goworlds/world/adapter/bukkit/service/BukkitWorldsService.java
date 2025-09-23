@@ -65,7 +65,7 @@ public final class BukkitWorldsService implements WorldsService {
   @Override
   public boolean loadWorld(final @NotNull WorldRecord record) {
     if (Bukkit.getWorld(record.name()) != null) {
-      return true;
+      return false;
     }
 
     final var directory = worldsDirectory.pathOf(record.name());
