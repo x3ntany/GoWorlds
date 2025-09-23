@@ -84,7 +84,7 @@ public final class BukkitWorldsService implements WorldsService {
     final var world = Bukkit.getWorld(name);
 
     if (world == null) {
-      return true;
+      return false;
     }
 
     final var fallback = Bukkit.getWorlds().stream()
