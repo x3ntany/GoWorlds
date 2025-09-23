@@ -19,6 +19,7 @@ public enum MessageKey {
   USAGE_INFO(path("usage", "info"), "info (name)"),
   USAGE_TELEPORT(path("usage", "teleport"), "teleport (world) [player]"),
 
+  COMMON_WORLD_NAME_INVALID(path("common", "world-name-invalid"), "&cНекорректное имя мира: &e{name}&7. Допускаются символы: &f{pattern}"),
   COMMON_WORLD_REQUIRED(path("common", "world-required"), "&cНужно указать название мира."),
   COMMON_WORLD_UNKNOWN(path("common", "world-unknown"), "&cНеизвестный мир: &e{name} &7(не управляется)"),
 
