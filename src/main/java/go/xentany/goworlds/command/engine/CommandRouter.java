@@ -17,13 +17,8 @@ import org.jetbrains.annotations.NotNull;
 
 public final class CommandRouter implements CommandExecutor, TabCompleter {
 
-  private final String name;
   private final List<CommandAction> catalog = new ArrayList<>();
   private final Map<String, CommandAction> index = new LinkedHashMap<>();
-
-  public CommandRouter(final @NotNull String name) {
-    this.name = Objects.requireNonNull(name, "name");
-  }
 
   public CommandRouter register(final @NotNull CommandAction action) {
     Objects.requireNonNull(action, "subcommand");
@@ -40,7 +35,7 @@ public final class CommandRouter implements CommandExecutor, TabCompleter {
                            final @NotNull String label,
                            final @NotNull String @NotNull [] arguments) {
     if (arguments.length == 0) {
-      sendUsage(sender);
+      sendUsage(sender, label);
 
       return true;
     }
@@ -49,7 +44,7 @@ public final class CommandRouter implements CommandExecutor, TabCompleter {
     final var subcommand = index.get(token);
 
     if (subcommand == null) {
-      sendUsage(sender);
+      sendUsage(sender, label);
 
       return true;
     }
@@ -57,7 +52,10 @@ public final class CommandRouter implements CommandExecutor, TabCompleter {
     final int arity = arguments.length - 1;
 
     if (arity < subcommand.arity()) {
-      sender.sendMessage("Usage: /" + name + " " + subcommand.usage());
+      Messages.send(sender, MessageKey.USAGE_PREFIX, Messages.vars(
+          "command", label,
+          "usage", subcommand.usage())
+      );
 
       return true;
     }
@@ -95,12 +93,12 @@ public final class CommandRouter implements CommandExecutor, TabCompleter {
     return subcommand.completer().suggest(context);
   }
 
-  private void sendUsage(final @NotNull CommandSender sender) {
+  private void sendUsage(final @NotNull CommandSender sender, final @NotNull String label) {
     Messages.send(sender, MessageKey.ROUTER_USAGE_HEADER);
 
     for (final var sub : catalog) {
       Messages.send(sender, MessageKey.ROUTER_USAGE_LINE, Messages.vars(
-          "command", name,
+          "command", label,
           "usage", sub.usage())
       );
     }

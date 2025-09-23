@@ -10,10 +10,12 @@ import go.xentany.goworlds.world.port.generation.WorldGenerationApplier;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -83,6 +85,27 @@ public final class BukkitWorldsService implements WorldsService {
 
     if (world == null) {
       return true;
+    }
+
+    final var fallback = Bukkit.getWorlds().stream()
+        .filter(otherWorld -> !otherWorld.equals(world))
+        .findFirst()
+        .orElse(null);
+
+    if (fallback == null) {
+      logger.warn("There is no other world for players to teleport to. Cancel upload {}", name);
+
+      return false;
+    }
+
+    final var target = fallback.getSpawnLocation();
+
+    for (final var player : List.copyOf(world.getPlayers())) {
+      if (player.isInsideVehicle()) {
+        player.leaveVehicle();
+      }
+
+      player.teleportAsync(target, PlayerTeleportEvent.TeleportCause.PLUGIN);
     }
 
     final var ok = Bukkit.unloadWorld(world, save);

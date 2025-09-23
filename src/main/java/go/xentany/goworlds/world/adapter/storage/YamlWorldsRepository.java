@@ -4,19 +4,12 @@ import go.xentany.goworlds.config.YamlConfigService;
 import go.xentany.goworlds.world.domain.WorldEnvironment;
 import go.xentany.goworlds.world.domain.WorldRecord;
 import go.xentany.goworlds.world.port.WorldsRepository;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public final class YamlWorldsRepository implements WorldsRepository {
 
@@ -74,8 +67,15 @@ public final class YamlWorldsRepository implements WorldsRepository {
   }
 
   @Override
-  public @NotNull @UnmodifiableView Collection<WorldRecord> worlds() {
-    return Collections.unmodifiableCollection(byName.values());
+  public @NotNull @UnmodifiableView Collection<WorldRecord> worlds(final boolean requireLoaded,
+                                                                   final boolean requireUnloaded) {
+    if (requireLoaded == requireUnloaded) {
+      return Collections.unmodifiableCollection(byName.values());
+    }
+
+    return byName.values().stream()
+        .filter(record -> (Bukkit.getWorld(record.name()) != null) == requireLoaded)
+        .toList();
   }
 
   @Override

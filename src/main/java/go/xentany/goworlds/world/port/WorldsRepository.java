@@ -12,7 +12,7 @@ public interface WorldsRepository {
 
   void save();
 
-  @NotNull Collection<WorldRecord> worlds();
+  @NotNull Collection<WorldRecord> worlds(final boolean requireLoaded, final boolean requireUnloaded);
 
   @NotNull Optional<WorldRecord> optionalWorld(final @NotNull String name);
 

@@ -64,13 +64,15 @@ public final class GoWorldsPlugin extends JavaPlugin {
         logger.warn("Command 'goworlds' is not defined in plugin.yml");
       }
 
-      final var records = new ArrayList<>(repository.worlds());
+      final var records = new ArrayList<>(repository.worlds(true, true));
 
       int ok = 0;
 
       for (final var record : records) {
         try {
-          if (worldsService.loadWorld(record)) ok++;
+          if (worldsService.loadWorld(record)) {
+            ok++;
+          }
         } catch (final Throwable throwable) {
           logger.warn("Autoload failed: {}", record.name(), throwable);
         }

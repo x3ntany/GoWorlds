@@ -35,9 +35,9 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
     final var repository = service.repository();
     final var defaultGenerator = WorldGenerator.NORMAL.name();
 
-    return new CommandRouter("goworlds")
+    return new CommandRouter()
         .register(new CommandAction("list", Messages.get(MessageKey.USAGE_LIST), context -> {
-          final var records = new ArrayList<>(repository.worlds());
+          final var records = new ArrayList<>(repository.worlds(true, true));
           final var sender = context.sender();
 
           Messages.send(sender, MessageKey.LIST_HEADER, Messages.vars("count", records.size()));
@@ -130,7 +130,7 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
           } else {
             Messages.send(sender, MessageKey.LOAD_FAIL, Messages.vars("name", name));
           }
-        }, this::worlds, 1))
+        }, context -> worlds(context, false, true), 1))
         .register(new CommandAction("unload", Messages.get(MessageKey.USAGE_UNLOAD), context -> {
           final var sender = context.sender();
           final var name = context.argument(0);
@@ -149,7 +149,7 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
           } else {
             Messages.send(sender, MessageKey.UNLOAD_FAIL, Messages.vars("name", name));
           }
-        }, this::worlds, 1))
+        }, context -> worlds(context, true, false), 1))
         .register(new CommandAction("delete", Messages.get(MessageKey.USAGE_DELETE), context -> {
           final var sender = context.sender();
           final var name = context.argument(0);
@@ -167,7 +167,7 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
           } else {
             Messages.send(sender, MessageKey.DELETE_FAIL, Messages.vars("name", name));
           }
-        }, this::worlds, 1))
+        }, context -> worlds(context, true, true), 1))
         .register(new CommandAction("info", Messages.get(MessageKey.USAGE_INFO), context -> {
           final var sender = context.sender();
           final var name = context.argument(0);
@@ -196,7 +196,7 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
               "generator", record.generator(),
               "loaded", loaded
           ));
-        }, this::worlds, 1))
+        }, context -> worlds(context, true, true), 1))
         .register(new CommandAction("teleport", Messages.get(MessageKey.USAGE_TELEPORT), context -> {
           final var sender = context.sender();
           final var count = context.arity();
@@ -261,7 +261,7 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
           if (world == null) {
             final var record = repository.optionalWorld(name);
 
-            if (record.isPresent() && service.loadWorld(record.get())) {
+            if (record.isPresent()) {
               world = Bukkit.getWorld(name);
             }
           }
@@ -292,7 +292,7 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
           final var count = context.arity();
 
           if (count == 1) {
-            final var names = new LinkedHashSet<>(worlds(context));
+            final var names = new LinkedHashSet<>(worlds(context, true, false));
 
             for (final var world : Bukkit.getWorlds()) {
               names.add(world.getName());
@@ -349,9 +349,11 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
     return List.of();
   }
 
-  private @NotNull List<String> worlds(final @NotNull CommandContext context) {
+  private @NotNull List<String> worlds(final @NotNull CommandContext context,
+                                       final boolean requireLoaded,
+                                       final boolean requireUnloaded) {
     return context.arity() == 1
-        ? completions(context.argument(0), service.repository().worlds(), WorldRecord::name)
+        ? completions(context.argument(0), service.repository().worlds(requireLoaded, requireUnloaded), WorldRecord::name)
         : List.of();
   }
 
