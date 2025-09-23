@@ -188,7 +188,7 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
           } else {
             Messages.send(sender, MessageKey.DELETE_FAIL, Messages.vars("name", name));
           }
-        }, context -> worlds(context, true, true), 1))
+        }, context -> worlds(context, false, true), 1))
         .register(new CommandAction("info", Messages.get(MessageKey.USAGE_INFO), context -> {
           final var sender = context.sender();
           final var name = context.argument(0);
