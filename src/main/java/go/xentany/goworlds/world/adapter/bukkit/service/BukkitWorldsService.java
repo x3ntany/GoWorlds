@@ -152,7 +152,7 @@ public final class BukkitWorldsService implements WorldsService {
     final var existing = Bukkit.getWorld(record.name());
 
     if (existing != null) {
-      return Optional.of(existing);
+      return Optional.empty();
     }
 
     final var creator = new WorldCreator(record.name()).environment(BukkitWorldEnvironmentMapper.toBukkit(record.environment()));
