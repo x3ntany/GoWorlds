@@ -47,7 +47,6 @@ public enum MessageKey {
   TELEPORT_FAILED(path("teleport", "teleport-failed"), "&cТелепорт не удался."),
   TELEPORT_SUCCESS_SELF(path("teleport", "success-self"), "&aТелепортирован в &e{name}"),
   TELEPORT_SUCCESS_OTHER(path("teleport", "success-other"), "&aТелепортирован &e{player}&a в &e{name}"),
-  TELEPORT_USAGE(path("teleport", "usage"), "&7Использование: &e/{command} teleport (world) [player]"),
   TELEPORT_WORLD_NOT_LOADED(path("teleport", "world-not-loaded"), "&cМир не загружен: &e{name}"),
   TELEPORT_ONLY_PLAYER(path("teleport", "only-player"), "&cТолько игрок может: &e/{command} teleport (world)");
 

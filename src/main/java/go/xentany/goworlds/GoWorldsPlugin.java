@@ -10,9 +10,13 @@ import go.xentany.goworlds.world.adapter.bukkit.generation.chunk.BukkitVoidChunk
 import go.xentany.goworlds.world.adapter.bukkit.service.BukkitWorldsService;
 import go.xentany.goworlds.world.adapter.filesystem.NioWorldsDirectory;
 import go.xentany.goworlds.world.adapter.storage.YamlWorldsRepository;
+import go.xentany.goworlds.world.port.WorldsRepository;
+import go.xentany.goworlds.world.port.WorldsService;
 import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -21,13 +25,17 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
-public final class GoWorldsPlugin extends JavaPlugin {
+public final class GoWorldsPlugin extends JavaPlugin implements Listener {
+
 
   private final ChunkGenerator voidChunkGenerator = new BukkitVoidChunkGenerator();
-
+  private final CompletableFuture<Void> serverReady = new CompletableFuture<>();
+  private BukkitTask readinessPoller;
   private Logger logger;
-  private YamlWorldsRepository repository;
+  private WorldsRepository repository;
+  private WorldsService service;
 
   @Override
   public void onEnable() {
@@ -52,11 +60,12 @@ public final class GoWorldsPlugin extends JavaPlugin {
       repository = new YamlWorldsRepository(file, yaml);
       repository.load();
 
-      final var worldsService = new BukkitWorldsService(directory, logger, repository, generatorApplier);
+      service = new BukkitWorldsService(directory, logger, repository, generatorApplier);
+
       final var root = getCommand("goworlds");
 
       if (root != null) {
-        final var executor = new GoWorldsCommand(worldsService);
+        final var executor = new GoWorldsCommand(service);
 
         root.setExecutor(executor);
         root.setTabCompleter(executor);
@@ -64,26 +73,61 @@ public final class GoWorldsPlugin extends JavaPlugin {
         logger.warn("Command 'goworlds' is not defined in plugin.yml");
       }
 
-      final var records = new ArrayList<>(repository.worlds(true, true));
+      serverReady.thenRun(() -> {
+        var records = new ArrayList<>(repository.worlds(true, true));
+        int ok = 0;
 
-      int ok = 0;
-
-      for (final var record : records) {
-        try {
-          if (worldsService.loadWorld(record)) {
-            ok++;
+        for (final var record : records) {
+          try {
+            if (service.loadWorld(record)) {
+              ok++;
+            }
+          } catch (final Throwable t) {
+            logger.warn("Autoload failed: {}", record.name(), t);
           }
-        } catch (final Throwable throwable) {
-          logger.warn("Autoload failed: {}", record.name(), throwable);
         }
-      }
 
-      logger.info("Autoloaded worlds: {}/{}", ok, records.size());
+        logger.info("Autoloaded worlds: {}/{}", ok, records.size());
+      });
+
+      if (!tryCompleteWorldLoadReadiness()) {
+        readinessPoller = Bukkit.getScheduler().runTaskTimer(this, () -> {
+          if (tryCompleteWorldLoadReadiness()) {
+            if (readinessPoller != null) {
+              readinessPoller.cancel();
+            }
+          }
+        }, 1L, 1L);
+      }
     } catch (final Exception exception) {
       logger.error("Failed to enable plugin: {}", exception.getMessage(), exception);
 
       Bukkit.getPluginManager().disablePlugin(this);
     }
+  }
+
+  private boolean tryCompleteWorldLoadReadiness() {
+    if (!isEnabled()) {
+      return false;
+    }
+
+    if (Bukkit.isStopping()) {
+      return false;
+    }
+
+    if (repository == null || service == null) {
+      return false;
+    }
+
+    if (Bukkit.getWorlds().isEmpty()) {
+      return false;
+    }
+
+    if (!serverReady.isDone()) {
+      serverReady.complete(null);
+    }
+
+    return true;
   }
 
   @Override

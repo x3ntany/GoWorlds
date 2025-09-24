@@ -223,8 +223,6 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
           final var count = context.arity();
 
           if (count == 0) {
-            Messages.send(sender, MessageKey.TELEPORT_USAGE, Messages.vars("command", context.label()));
-
             return;
           }
 
@@ -234,8 +232,6 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
 
           if (count == 1) {
             if (first == null) {
-              Messages.send(sender, MessageKey.TELEPORT_USAGE, Messages.vars("command", context.label()));
-
               return;
             }
 
@@ -252,8 +248,6 @@ public final class GoWorldsCommand implements CommandExecutor, TabCompleter {
             final var second = context.argument(1);
 
             if (first == null || second == null) {
-              Messages.send(sender, MessageKey.TELEPORT_USAGE, Messages.vars("command", context.label()));
-
               return;
             }
 

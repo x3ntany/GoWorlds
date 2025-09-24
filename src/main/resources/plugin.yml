@@ -3,6 +3,7 @@ version: ${project.version}
 main: go.xentany.goworlds.GoWorldsPlugin
 api-version: '1.16'
 author: x3ntany
+load: STARTUP
 commands:
   goworlds:
     aliases: [gw, worlds]
