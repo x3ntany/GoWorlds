@@ -1,6 +1,5 @@
 package go.xentany.goworlds.world.domain;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -8,14 +7,17 @@ import java.util.Locale;
 public enum WorldGenerator {
 
   NORMAL,
-  FLAT,
-  VOID;
+  FLAT;
 
-  public static @NotNull WorldGenerator fromName(final @Nullable String input) {
-    return input == null ? NORMAL : switch (input.toUpperCase(Locale.ROOT)) {
-      case "FLAT" -> FLAT;
-      case "VOID" -> VOID;
-      default -> NORMAL;
-    };
+  public static @Nullable WorldGenerator fromName(final @Nullable String input) {
+    if (input == null) {
+      return null;
+    }
+
+    try {
+      return WorldGenerator.valueOf(input.toUpperCase(Locale.ROOT));
+    } catch (final IllegalArgumentException exception) {
+      return null;
+    }
   }
 }

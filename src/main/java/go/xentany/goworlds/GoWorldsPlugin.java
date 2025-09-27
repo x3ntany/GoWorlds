@@ -6,7 +6,6 @@ import go.xentany.goworlds.locale.Messages;
 import go.xentany.goworlds.world.adapter.bukkit.generation.applier.BuiltinWorldGenerationApplier;
 import go.xentany.goworlds.world.adapter.bukkit.generation.applier.CompositeWorldGenerationApplier;
 import go.xentany.goworlds.world.adapter.bukkit.generation.applier.PluginWorldGenerationApplier;
-import go.xentany.goworlds.world.adapter.bukkit.generation.chunk.BukkitVoidChunkGenerator;
 import go.xentany.goworlds.world.adapter.bukkit.service.BukkitWorldsService;
 import go.xentany.goworlds.world.adapter.filesystem.NioWorldsDirectory;
 import go.xentany.goworlds.world.adapter.storage.YamlWorldsRepository;
@@ -14,23 +13,17 @@ import go.xentany.goworlds.world.port.WorldsRepository;
 import go.xentany.goworlds.world.port.WorldsService;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
-import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 public final class GoWorldsPlugin extends JavaPlugin implements Listener {
 
-
-  private final ChunkGenerator voidChunkGenerator = new BukkitVoidChunkGenerator();
   private final CompletableFuture<Void> serverReady = new CompletableFuture<>();
   private BukkitTask readinessPoller;
   private Logger logger;
@@ -47,8 +40,8 @@ public final class GoWorldsPlugin extends JavaPlugin implements Listener {
       final var directory = new NioWorldsDirectory(Bukkit.getWorldContainer().toPath());
       final var generatorApplier = new CompositeWorldGenerationApplier(
           List.of(
-              new BuiltinWorldGenerationApplier(voidChunkGenerator, logger),
-              new PluginWorldGenerationApplier(logger)
+              new BuiltinWorldGenerationApplier(logger),
+              new PluginWorldGenerationApplier()
           )
       );
 
@@ -141,13 +134,5 @@ public final class GoWorldsPlugin extends JavaPlugin implements Listener {
         }
       }
     }
-  }
-
-  @Override
-  public @Nullable ChunkGenerator getDefaultWorldGenerator(final @NotNull String ignored,
-                                                           final @Nullable String generator) {
-    return (generator == null ? "" : generator.trim()).toLowerCase(Locale.ROOT).equals("void")
-        ? voidChunkGenerator
-        : null;
   }
 }

@@ -5,7 +5,6 @@ import go.xentany.goworlds.world.domain.WorldEnvironment;
 import go.xentany.goworlds.world.port.generation.WorldGenerationApplier;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
-import org.bukkit.generator.ChunkGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -13,12 +12,9 @@ import java.util.Objects;
 
 public final class BuiltinWorldGenerationApplier implements WorldGenerationApplier {
 
-  private final ChunkGenerator voidChunkGenerator;
   private final Logger logger;
 
-  public BuiltinWorldGenerationApplier(final @NotNull ChunkGenerator voidChunkGenerator,
-                                       final @NotNull Logger logger) {
-    this.voidChunkGenerator = Objects.requireNonNull(voidChunkGenerator, "voidChunkGenerator");
+  public BuiltinWorldGenerationApplier(final @NotNull Logger logger) {
     this.logger = Objects.requireNonNull(logger, "logger");
   }
 
@@ -27,6 +23,10 @@ public final class BuiltinWorldGenerationApplier implements WorldGenerationAppli
                        final @NotNull WorldEnvironment environment,
                        final @NotNull String generator) {
     final var builtin = WorldGenerator.fromName(generator);
+
+    if (builtin == null) {
+      return false;
+    }
 
     switch (builtin) {
       case NORMAL -> {
@@ -39,12 +39,6 @@ public final class BuiltinWorldGenerationApplier implements WorldGenerationAppli
         } else {
           logger.info("FLAT applies only to NORMAL environment; using default generator.");
         }
-
-        return true;
-      }
-
-      case VOID -> {
-        creator.generator(voidChunkGenerator);
 
         return true;
       }
